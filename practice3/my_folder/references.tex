@@ -1,28 +1,20 @@
-%%% Не мянять - Do not modify
-%%
-%%
-\clearpage                                  % В том числе гарантирует, что список литературы в оглавлении будет с правильным номером страницы
-%\hypersetup{ urlcolor=black }               % Ссылки делаем чёрными
-%\providecommand*{\BibDash}{}                % В стилях ugost2008 отключаем использование тире как разделителя 
-\urlstyle{rm}                               % ссылки URL обычным шрифтом
-\ifdefmacro{\microtypesetup}{\microtypesetup{protrusion=false}}{} % не рекомендуется применять пакет микротипографики к автоматически генерируемому списку литературы
-%\newcommand{\fullbibtitle}{Список литературы} % (ГОСТ Р 7.0.11-2011, 4)
-%\insertbibliofull  
-%\noindent
-%\begin{group}
-\chapter*{Список использованных источников}	
+\clearpage
+\urlstyle{rm}
+\chapter*{Список использованных источников}
 \label{references}
-\addcontentsline{toc}{chapter}{Список использованных источников}	% в оглавление 
-\nocite{*}
-\printbibliography[heading=none]                         % Подключаем Bib-базы
-%\ifdefmacro{\microtypesetup}{\microtypesetup{protrusion=true}}{}
-%\urlstyle{tt}                               % возвращаем установки шрифта ссылок URL
-%\hypersetup{ urlcolor={urlcolor} }          % Восстанавливаем цвет ссылок
+\addcontentsline{toc}{chapter}{Список использованных источников}
 
-
-
-%\urlstyle{rm}                               % ссылки URL обычным шрифтом
-%\ifdefmacro{\microtypesetup}{\microtypesetup{protrusion=false}}{} % не рекомендуется применять пакет микротипографики к автоматически генерируемому списку литературы
-%\insertbibliofull                           % Подключаем Bib-базы
-%\ifdefmacro{\microtypesetup}{\microtypesetup{protrusion=true}}{}
-%\urlstyle{tt}                               % возвращаем установки шрифта ссылок URL
+\begin{enumerate}
+    \item Jazzer.js: Coverage-guided, in-process fuzzing for Node.js. URL: \url{https://github.com/CodeIntelligenceTesting/jazzer.js} (дата обращения: 27.05.2026).
+    \item Jazzer and Jazzer.js. Code Intelligence. URL: \url{https://www.code-intelligence.com/jazzer-jazzer.js} (дата обращения: 27.05.2026).
+    \item ESLint Security Plugin. URL: \url{https://www.npmjs.com/package/eslint-plugin-security} (дата обращения: 27.05.2026).
+    \item SonarJS rules for ESLint. URL: \url{https://github.com/SonarSource/eslint-plugin-sonarjs} (дата обращения: 27.05.2026).
+    \item JavaScript/TypeScript/CSS Analysis in SonarQube Server. URL: \url{https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/languages/javascript-typescript-css} (дата обращения: 27.05.2026).
+    \item Банк данных угроз безопасности информации ФСТЭК России. URL: \url{https://bdu.fstec.ru/threat} (дата обращения: 27.05.2026).
+    \item MITRE Common Weakness Enumeration. URL: \url{https://cwe.mitre.org/data/definitions/699.html} (дата обращения: 27.05.2026).
+    \item CWE-1333: Inefficient Regular Expression Complexity. URL: \url{https://cwe.mitre.org/data/definitions/1333.html} (дата обращения: 27.05.2026).
+    \item CWE Top 25 Most Dangerous Software Weaknesses. URL: \url{https://cwe.mitre.org/top25/} (дата обращения: 27.05.2026).
+    \item Анализ ошибок копирования. PVS-Studio. URL: \url{https://habr.com/ru/companies/pvs-studio/articles/112276/} (дата обращения: 27.05.2026).
+    \item Различие CWE, CVE, CVSS. PVS-Studio. URL: \url{https://habr.com/ru/companies/pvs-studio/articles/580474/} (дата обращения: 27.05.2026).
+    \item Manacher G. A New Linear-Time ``On-Line'' Algorithm for Finding the Smallest Initial Palindrome of a String // Journal of the ACM. 1975. Vol. 22, No. 3. P. 346--351.
+\end{enumerate}

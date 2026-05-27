@@ -1,31 +1,84 @@
 \chapter{Отчёты фаззинга и статического анализа}\label{appendix-reports}
 
-\section*{reports/fuzz/dataset-fuzz.txt}
-\lstinputlisting[
-  basicstyle=\fontsize{9pt}{11pt}\selectfont\ttfamily,
-  numberstyle=\fontsize{8pt}{10pt}\selectfont,
-  firstnumber=1,
-  stepnumber=1,
-  breaklines=true,
-  breakatwhitespace=false
-]{palindrome_app/reports/fuzz/dataset-fuzz.txt}
+\section*{Отчёт фаззинга datasetNameFuzzTarget.js}
+\begin{lstlisting}[basicstyle=\fontsize{9pt}{11pt}\selectfont\ttfamily,breaklines=true]
+Command:
+npm run fuzz:dataset
 
-\section*{reports/fuzz/percent-fuzz.txt}
-\lstinputlisting[
-  basicstyle=\fontsize{9pt}{11pt}\selectfont\ttfamily,
-  numberstyle=\fontsize{8pt}{10pt}\selectfont,
-  firstnumber=1,
-  stepnumber=1,
-  breaklines=true,
-  breakatwhitespace=false
-]{palindrome_app/reports/fuzz/percent-fuzz.txt}
+Target:
+fuzz/datasetNameFuzzTarget.js
 
-\section*{reports/static/static-summary.csv}
-\lstinputlisting[
-  basicstyle=\fontsize{9pt}{11pt}\selectfont\ttfamily,
-  numberstyle=\fontsize{8pt}{10pt}\selectfont,
-  firstnumber=1,
-  stepnumber=1,
-  breaklines=true,
-  breakatwhitespace=false
-]{palindrome_app/reports/static/static-summary.csv}
+Tested module:
+src/vulnerable/datasetNameParser.js
+
+Result:
+Jazzer.js found an uncaught exception.
+
+Exception:
+TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+
+Location:
+src/vulnerable/datasetNameParser.js:8
+
+Minimal input:
+empty string
+
+Crash artifact:
+crash-da39a3ee5e6b4b0d3255bfef95601890afd80709
+
+Runs before crash:
+1
+
+Explanation:
+The parser calls parts[2].toLowerCase() without checking that the dataset name contains three parts in the TYPE_SIZE_SERIES format.
+\end{lstlisting}
+
+\section*{Отчёт фаззинга percentDecoderFuzzTarget.js}
+\begin{lstlisting}[basicstyle=\fontsize{9pt}{11pt}\selectfont\ttfamily,breaklines=true]
+Command:
+npm run fuzz:percent
+
+Target:
+fuzz/percentDecoderFuzzTarget.js
+
+Tested module:
+src/vulnerable/percentInputDecoder.js
+
+Result:
+Jazzer.js found an uncaught exception.
+
+Exception:
+URIError: URI malformed
+
+Location:
+src/vulnerable/percentInputDecoder.js:2
+
+Minimal input:
+%
+
+Base64:
+JQ==
+
+Crash artifact:
+crash-4345cb1fa27885a8fbfe7c0c830a592cc76a552b
+
+Runs before crash:
+134
+
+Memory:
+rss approximately 170 Mb
+
+Explanation:
+The decoder passes user input directly to decodeURIComponent and does not handle malformed percent-encoded sequences.
+\end{lstlisting}
+
+\section*{Сводка статического анализа}
+\begin{lstlisting}[basicstyle=\fontsize{8pt}{10pt}\selectfont\ttfamily,breaklines=true]
+file,line,ruleId,severity,message
+scripts/generateDatasets.js,26,security/detect-non-literal-fs-filename,1,"Found writeFileSync from package fs with non literal argument at index 0"
+src/io/jsonReader.js,44,security/detect-non-literal-fs-filename,1,"Found createReadStream from package fs with non literal argument at index 0"
+src/io/resultWriter.js,20,security/detect-non-literal-fs-filename,1,"Found writeFileSync from package fs with non literal argument at index 0"
+src/vulnerable/datasetNameParser.js,2,security/detect-unsafe-regex,1,"Unsafe Regular Expression"
+src/vulnerable/datasetNameParser.js,2,sonarjs/slow-regex,1,"Make sure the regex used here, which is vulnerable to super-linear runtime due to backtracking, cannot lead to denial of service."
+src/vulnerable/percentInputDecoder.js,7,sonarjs/no-duplicated-branches,1,"Merge this case with the identical one on line 9."
+\end{lstlisting}

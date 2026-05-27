@@ -1,28 +1,29 @@
+Command:
+npm run fuzz:dataset
 
-> manacher-palindrome-console-app@1.0.0 fuzz:dataset
-> jazzer fuzz/datasetNameFuzzTarget.js --sync -- -runs=20000
+Target:
+fuzz/datasetNameFuzzTarget.js
 
-node.exe : INFO: Using generated seed: 370434138
-At line:1 char:1
-+ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (INFO: Using generated seed: 370434138:String) [], RemoteException
-    + FullyQualifiedErrorId : NativeCommandError
- 
-Dictionary: 4 entries
-INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 370434138
-INFO: Loaded 1 modules   (512 inline 8-bit counters): 512 [000002897DBCD040, 000002897DBCD240), 
-INFO: Loaded 1 PC tables (512 PCs): 512 [000002897D4AA1A0,000002897D4AC1A0), 
-INFO: -max_len is not provided; libFuzzer will not generate inputs larger than 4096 bytes
-==23776== Uncaught Exception: TypeError: Cannot read properties of undefined (reading 'toLowerCase')
-    at parseDatasetName (C:\mtpo-lab2\practice3\palindrome_app\src\vulnerable\datasetNameParser.js:8:27)
-    at fuzz (C:\mtpo-lab2\practice3\palindrome_app\fuzz\datasetNameFuzzTarget.js:4:3)
-    at processTicksAndRejections (node:internal/process/task_queues:103:5)
-MS: 0 ; base unit: 0000000000000000000000000000000000000000
+Tested module:
+src/vulnerable/datasetNameParser.js
 
+Result:
+Jazzer.js found an uncaught exception.
 
-artifact_prefix='./'; Test unit written to ./crash-da39a3ee5e6b4b0d3255bfef95601890afd80709
-Base64: 
-Done 1 runs in 0 second(s)
+Exception:
+TypeError: Cannot read properties of undefined (reading 'toLowerCase')
 
+Location:
+src/vulnerable/datasetNameParser.js:8
+
+Minimal input:
+empty string
+
+Crash artifact:
+crash-da39a3ee5e6b4b0d3255bfef95601890afd80709
+
+Runs before crash:
+1
+
+Explanation:
+The parser calls parts[2].toLowerCase() without checking that the dataset name contains three parts in the TYPE_SIZE_SERIES format.

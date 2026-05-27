@@ -1,31 +1,35 @@
+Command:
+npm run fuzz:percent
 
-> manacher-palindrome-console-app@1.0.0 fuzz:percent
-> jazzer fuzz/percentDecoderFuzzTarget.js --sync -- -runs=20000
+Target:
+fuzz/percentDecoderFuzzTarget.js
 
-node.exe : INFO: Using generated seed: 1038714349
-At line:1 char:1
-+ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (INFO: Using generated seed: 1038714349:String) [], RemoteException
-    + FullyQualifiedErrorId : NativeCommandError
- 
-Dictionary: 4 entries
-INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 1038714349
-INFO: Loaded 1 modules   (512 inline 8-bit counters): 512 [000001DC64246040, 000001DC64246240), 
-INFO: Loaded 1 PC tables (512 PCs): 512 [000001DC4BA26FA0,000001DC4BA28FA0), 
-INFO: -max_len is not provided; libFuzzer will not generate inputs larger than 4096 bytes
-INFO: A corpus is not provided, starting from an empty corpus
-#2	INITED cov: 2 ft: 2 corp: 1/1b exec/s: 0 rss: 170Mb
-==29256== Uncaught Exception: URIError: URI malformed
-    at decodeURIComponent (<anonymous>)
-    at decodePercentInput (C:\mtpo-lab2\practice3\palindrome_app\src\vulnerable\percentInputDecoder.js:2:19)
-    at fuzz (C:\mtpo-lab2\practice3\palindrome_app\fuzz\percentDecoderFuzzTarget.js:4:3)
-    at processTicksAndRejections (node:internal/process/task_queues:103:5)
-MS: 2 CrossOver-ChangeByte-; base unit: adc83b19e793491b1c6ea0fd8b46cd9f32e592fc
-0x25,
+Tested module:
+src/vulnerable/percentInputDecoder.js
+
+Result:
+Jazzer.js found an uncaught exception.
+
+Exception:
+URIError: URI malformed
+
+Location:
+src/vulnerable/percentInputDecoder.js:2
+
+Minimal input:
 %
-artifact_prefix='./'; Test unit written to ./crash-4345cb1fa27885a8fbfe7c0c830a592cc76a552b
-Base64: JQ==
-Done 134 runs in 0 second(s)
 
+Base64:
+JQ==
+
+Crash artifact:
+crash-4345cb1fa27885a8fbfe7c0c830a592cc76a552b
+
+Runs before crash:
+134
+
+Memory:
+rss approximately 170 Mb
+
+Explanation:
+The decoder passes user input directly to decodeURIComponent and does not handle malformed percent-encoded sequences.

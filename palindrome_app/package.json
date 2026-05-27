@@ -8,9 +8,13 @@
     "start": "node src/index.js",
     "test": "jest --runInBand",
     "test:watch": "jest --watch",
+    "bdd": "cucumber-js features --require features/step_definitions/**/*.js --require features/support/**/*.js --format progress --format html:reports/cucumber/report.html",
+    "datasets": "node scripts/generateDatasets.js",
+    "perf": "node scripts/runPerformanceExperiment.js",
     "mutation": "stryker run"
   },
   "devDependencies": {
+    "@cucumber/cucumber": "^10.9.0",
     "@stryker-mutator/core": "^8.5.0",
     "@stryker-mutator/jest-runner": "^8.5.0",
     "chai": "^4.5.0",

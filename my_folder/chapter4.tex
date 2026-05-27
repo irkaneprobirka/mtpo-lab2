@@ -1,109 +1,77 @@
-\chapter{Реализация модульных тестов} \label{ch4}
+\chapter{Реализация BDD-инфраструктуры} \label{ch4}
 
-В данной главе описана практическая реализация модульных тестов, разработанных по принципам TDD для консольного приложения анализа палиндромных подстрок.
-После доработки тестового набора проект содержит 7 test suite и 64 теста, охватывающих вычислительное ядро, эталонный алгоритм сравнения, сервисный слой, JSON-ввод, файловый вывод, assumption-style helper и консольный интерфейс.
+В данной главе описана практическая реализация BDD-тестов в проекте Node.js и связь Gherkin-сценариев с кодом приложения.
 
-\section{Структура тестового набора} \label{ch4:sec1}
+\section{Структура BDD-файлов} \label{ch4:sec1}
 
-Тестовый набор разделён на следующие группы:
-\begin{itemize}
-    \item \texttt{manacherOdd.test.js} --- проверка нечетных радиусов;
-    \item \texttt{manacherEven.test.js} --- проверка четных радиусов;
-    \item \texttt{centerExpansion.test.js} --- проверка эталонного конкурирующего алгоритма;
-    \item \texttt{palindromeService.test.js} --- проверка сервисного слоя и восстановления ответа;
-    \item \texttt{jsonReader.test.js} --- проверка загрузки входных данных;
-    \item \texttt{resultWriter.test.js} --- проверка вывода в текстовый и JSON-формат;
-    \item \texttt{consoleUi.test.js} --- проверка пользовательского консольного сценария.
-\end{itemize}
-
-Такое разбиение соответствует архитектуре программы и делает возможной изолированную проверку каждого слоя.
-Дополнительно эталонный алгоритм \texttt{centerExpansion} используется при тестировании основного решения на алгоритме Манакера, что напрямую соответствует требованию задания о сравнении результатов двух разных алгоритмов.
-
-\section{Параметризованные тесты} \label{ch4:sec2}
-
-Для серий однотипных примеров используются параметризованные тесты Jest через \texttt{test.each()}.
-Так реализованы проверки массивов радиусов для строк \texttt{"a"}, \texttt{"ab"}, \texttt{"aa"}, \texttt{"abba"}, \texttt{"abacaba"} и \texttt{"aaaaa"}.
-
-Параметризация позволяет:
-\begin{itemize}
-    \item уменьшить дублирование кода;
-    \item сохранить наглядность связи между входом и ожидаемым результатом;
-    \item напрямую перенести в код контрольные примеры, разработанные на этапе test design.
-\end{itemize}
-
-\section{Реализация assertion и matchers} \label{ch4:sec3}
-
-В проекте применяются как минимум пять различных способов проверки результатов:
-\begin{itemize}
-    \item \texttt{toEqual} --- для массивов радиусов;
-    \item \texttt{toBe} --- для простых значений;
-    \item \texttt{toThrow} --- для негативных сценариев;
-    \item \texttt{to.equal} --- для строк и чисел;
-    \item \texttt{to.deep.equal} --- для объектов результата;
-    \item \texttt{to.include} --- для текстовых сообщений;
-    \item \texttt{to.have.lengthOf} --- для длины массивов и списка строк.
-\end{itemize}
-
-Тем самым требование задания по assertion и по использованию разных matchers выполняется на практике.
-
-\section{Assumption-style проверки и test doubles} \label{ch4:sec4}
-
-В \texttt{consoleUi.test.js} добавлены assumption-style предусловия, реализованные через методы \texttt{assumeTrue} и \texttt{assumeFileExists}.
-Они применяются для проверки корректности тестового окружения перед запуском сценария, связанного с help-модулем.
-
-Для работы с внешними зависимостями используются три вида test doubles:
-\begin{itemize}
-    \item \texttt{spy} --- контроль вызовов \texttt{logger} и \texttt{resultPrinter};
-    \item \texttt{stub} --- подмена методов файловой системы \texttt{fs.promises.access}, \texttt{fs.createReadStream} и \texttt{fs.writeFileSync};
-    \item \texttt{mock} --- формальное ожидание вызова компонента записи результата.
-\end{itemize}
-
-Это позволяет отдельно проверять как сам алгоритм, так и корректность взаимодействия между слоями программы.
-
-\section{Характерные тестовые сценарии} \label{ch4:sec5}
-
-Ключевые примеры реализованных тестов приведены в \taref{tab:test-examples}.
+В приложение добавлен каталог \texttt{features}. Его структура приведена в \taref{tab:bdd-files}.
 
 \noindent
 \begingroup
 \centering
 \small
-\begin{longtable}[c]{|p{3.2cm}|p{4.7cm}|p{7.1cm}|}
-    \caption{Характерные сценарии модульных тестов}
-    \label{tab:test-examples}
+\begin{longtable}[c]{|p{6.1cm}|p{8.9cm}|}
+    \caption{Структура BDD-инфраструктуры}
+    \label{tab:bdd-files}
     \\
     \hline
-    Группа & Сценарий & Проверяемое требование \\ \hline
+    Файл & Назначение \\ \hline
     \endfirsthead
-    \captionsetup{format=tablenocaption,labelformat=continued}
-    \caption[]{}\\
     \hline
-    Группа & Сценарий & Проверяемое требование \\ \hline
+    Файл & Назначение \\ \hline
     \endhead
     \hline
-    \endfoot
-    \hline
-    \endlastfoot
-    Нечетные радиусы & \texttt{"abacaba"} & корректность массива $d_{odd}$ \\ \hline
-    Четные радиусы & \texttt{"abba"} & корректность массива $d_{even}$ \\ \hline
-    Эталонный алгоритм & \texttt{expandAroundCenter("abba",1,2)} & корректность четного расширения от центра \\ \hline
-    Сервисный слой & \texttt{findLongestPalindrome(...)} & восстановление наибольшего палиндрома по радиусам \\ \hline
-    Рекомендации & строки разных классов & проверка всех четырёх ветвей \texttt{buildRecommendation()} \\ \hline
-    JSON-ввод & файл без поля \texttt{input} & корректное исключение при неверном формате \\ \hline
-    Файловый вывод & \texttt{writeResultToFile(...)} & запись JSON через stub без реального побочного эффекта \\ \hline
-    Консольный UI & сценарии команд \texttt{3 -> 0}, \texttt{4 -> 0}, \texttt{5}, \texttt{7} & запуск обоих алгоритмов, повторный показ результата и вывод справки \\ \hline
+    \texttt{features/palindrome\_analysis.feature} & Сценарии анализа строки, проверки результата и пользовательского отчёта \\ \hline
+    \texttt{features/json\_io.feature} & Сценарии загрузки строки из JSON и сохранения результата \\ \hline
+    \texttt{features/performance\_comparison.feature} & Нагрузочное сравнение Манакера и расширения от центра \\ \hline
+    \texttt{features/support/world.js} & Контекст сценария: входная строка, результат, ошибка, временная директория \\ \hline
+    \texttt{features/step\_definitions/palindromeSteps.js} & Реализация шагов Gherkin на JavaScript \\ \hline
 \end{longtable}
 \normalsize
 \endgroup
 
-\section{Результаты запуска тестов} \label{ch4:sec6}
+\section{World-контекст сценариев} \label{ch4:sec2}
 
-По итоговому запуску \texttt{npm test} в проекте успешно пройдены все 64 теста.
-Классическое покрытие \texttt{Jest} показало 100\% line coverage по всему проекту, 100\% statement coverage, 100\% function coverage и 96.29\% branch coverage.
-Полное покрытие строк достигнуто для вычислительных модулей \texttt{analyzers}, сервисного слоя, ввода-вывода и консольного интерфейса; неполное покрытие остаётся только по отдельным ветвям значений по умолчанию в \texttt{resultWriter.js} и \texttt{consoleUi.js}.
+Для хранения состояния между шагами используется Cucumber World. В нём сохраняются:
+\begin{itemize}
+    \item текущая входная строка;
+    \item результат алгоритма Манакера;
+    \item результат эталонного алгоритма;
+    \item последняя ошибка загрузки;
+    \item текстовый отчёт;
+    \item временная директория для JSON-файлов.
+\end{itemize}
+
+Такой подход позволяет отделить сценарии друг от друга и не загрязнять рабочие файлы проекта временными результатами тестов.
+
+\section{Step Definitions} \label{ch4:sec3}
+
+Файл \texttt{palindromeSteps.js} связывает русскоязычные шаги Gherkin с кодом приложения. Например, шаг
+\begin{center}
+\texttt{Если пользователь анализирует строку "abacaba" алгоритмом Манакера}
+\end{center}
+вызывает функцию \texttt{analyzeString(input)} из \texttt{src/services/palindromeService.js}. Затем шаги \texttt{То} и \texttt{И} проверяют поля \texttt{longestPalindrome}, \texttt{palindromeCount} и совпадение с \texttt{centerExpansion}.
+
+Для JSON-сценариев шаги создают временный файл, вызывают \texttt{readInputFromFile}, затем сохраняют результат через \texttt{writeResultToFile}. Для нагрузочных сценариев используется \texttt{measureAlgorithms}, который измеряет оба алгоритма на одной и той же строке.
+
+\section{Связь BDD с существующими unit-тестами} \label{ch4:sec4}
+
+В проекте уже присутствуют unit-тесты Jest для низкоуровневых деталей: массивов нечётных и чётных радиусов, восстановления максимального палиндрома, JSON-ввода и форматирования отчёта. BDD-сценарии добавлены поверх них и используют те же модули приложения. Это важно по двум причинам:
+\begin{enumerate}
+    \item BDD не дублирует внутренние unit-тесты построчно, а проверяет поведение на уровне пользователя;
+    \item если unit-тесты проходят, но BDD-сценарий падает, значит нарушена интеграция модулей или пользовательский сценарий.
+\end{enumerate}
+
+\section{Команды запуска} \label{ch4:sec5}
+
+В \texttt{package.json} добавлены команды:
+\begin{itemize}
+    \item \texttt{npm run bdd} --- запуск Gherkin-сценариев Cucumber.js;
+    \item \texttt{npm run datasets} --- генерация JSON-датасетов;
+    \item \texttt{npm run perf} --- запуск эксперимента производительности;
+    \item \texttt{npm test} --- запуск существующих unit-тестов Jest.
+\end{itemize}
 
 \section{Выводы} \label{ch4:conclusion}
 
-Реализация тестов полностью перенесла в код контрольные примеры, разработанные на этапе проектирования.
-В тестовом наборе присутствуют позитивные и негативные сценарии, параметризованные проверки, assertion различных типов, два assumption-style метода, три разновидности test doubles и сравнение результата Манакера с конкурирующим алгоритмом.
-Тем самым тестовая часть проекта соответствует формальным требованиям задания и при этом остаётся привязанной к реальному исполняемому коду.
+BDD-инфраструктура встроена в существующее приложение без изменения его основной архитектуры. Gherkin-файлы описывают требования, Step Definitions вызывают реальные модули проекта, а World-контекст обеспечивает изоляцию сценариев. В результате BDD-тесты становятся исполняемым описанием поведения приложения.

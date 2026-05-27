@@ -1,0 +1,72 @@
+[
+  {
+    "dataset": "ALT_1000_A",
+    "type": "alternate",
+    "length": 1000,
+    "manacherMs": 0.547,
+    "centerMs": 1.066,
+    "speedup": 1.949,
+    "memoryMb": 4.391,
+    "sameResult": true
+  },
+  {
+    "dataset": "ALT_5000_A",
+    "type": "alternate",
+    "length": 5000,
+    "manacherMs": 0.349,
+    "centerMs": 14.598,
+    "speedup": 41.827,
+    "memoryMb": 4.744,
+    "sameResult": true
+  },
+  {
+    "dataset": "MIR_2000_A",
+    "type": "mirror",
+    "length": 2000,
+    "manacherMs": 0.42,
+    "centerMs": 0.989,
+    "speedup": 2.355,
+    "memoryMb": 4.227,
+    "sameResult": true
+  },
+  {
+    "dataset": "MIR_10000_A",
+    "type": "mirror",
+    "length": 10000,
+    "manacherMs": 0.422,
+    "centerMs": 16.049,
+    "speedup": 38.005,
+    "memoryMb": 4.9,
+    "sameResult": true
+  },
+  {
+    "dataset": "UNI_4000_A",
+    "type": "uniform",
+    "length": 4000,
+    "manacherMs": 0.221,
+    "centerMs": 17.121,
+    "speedup": 77.577,
+    "memoryMb": 4.799,
+    "sameResult": true
+  },
+  {
+    "dataset": "UNI_16000_A",
+    "type": "uniform",
+    "length": 16000,
+    "manacherMs": 1.419,
+    "centerMs": 270.883,
+    "speedup": 190.83,
+    "memoryMb": 4.906,
+    "sameResult": true
+  },
+  {
+    "dataset": "RND_10000_A",
+    "type": "random-like",
+    "length": 10000,
+    "manacherMs": 0.738,
+    "centerMs": 0.616,
+    "speedup": 0.835,
+    "memoryMb": 6.007,
+    "sameResult": true
+  }
+]

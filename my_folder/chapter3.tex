@@ -1,0 +1,116 @@
+\chapter{Описание библиотек для модульных тестов} \label{ch3}
+
+В проекте на JavaScript используются библиотеки Jest, Sinon и Chai, а также вспомогательный assumption-style модуль, реализованный поверх Jest для явной фиксации предусловий тестов.
+Такой набор покрывает требования задания к TDD, параметризованным тестам, assertion, assumption, мокированию и матчерам.
+
+\section{Jest} \label{ch3:sec1}
+
+Jest применяется как основной тестовый фреймворк проекта~\cite{jest-docs}.
+Он отвечает за организацию test suite, запуск сценариев, параметризацию тестов и формирование отчётов покрытия.
+
+В проекте используются следующие средства Jest:
+\begin{itemize}
+    \item \texttt{describe()} для группировки тестов по модулям;
+    \item \texttt{test()} для описания отдельных сценариев;
+    \item \texttt{test.each()} для параметризованных проверок массивов радиусов;
+    \item \texttt{expect(...).toEqual(...)} и \texttt{expect(...).toBe(...)} для точных проверок значений;
+    \item \texttt{expect(...).toThrow(...)} для негативных сценариев.
+\end{itemize}
+
+Основные команды Jest, используемые в работе:
+\begin{itemize}
+    \item \texttt{npm test} --- запуск всех модульных тестов;
+    \item \texttt{npx jest --coverage --runInBand} --- расчёт классических метрик покрытия;
+    \item \texttt{test.each()} --- компактная реализация серий однотипных тестов.
+\end{itemize}
+
+\section{Sinon} \label{ch3:sec2}
+
+Sinon используется для изоляции внешних зависимостей и проверки взаимодействия между модулями~\cite{sinon-docs}.
+В отличие от вычислительного ядра, которое удобно проверять прямыми утверждениями, ввод-вывод и консольный интерфейс требуют контроля побочных эффектов.
+
+В текущем проекте задействованы все три требуемые разновидности test doubles:
+\begin{itemize}
+    \item \texttt{sinon.spy()} --- контроль вызовов функций печати в консоль;
+    \item \texttt{sinon.stub()} --- подмена \texttt{fs.writeFileSync}, \texttt{fs.promises.access} и \texttt{fs.createReadStream};
+    \item \texttt{sinon.mock()} --- формальное ожидание вызова компонента записи результата.
+\end{itemize}
+
+Таким образом, требование задания о трёх видах мокирования выполняется на реальном коде проекта, а не только декларативно в тексте отчёта.
+
+\section{Chai} \label{ch3:sec3}
+
+Chai применяется как библиотека выразительных утверждений~\cite{chai-docs}.
+Она особенно полезна там, где нужно сравнивать не одно значение, а структуру объекта или человекочитаемый текстовый отчёт.
+
+В проекте используются следующие конструкции Chai:
+\begin{itemize}
+    \item \texttt{expect(...).to.equal(...)} для строк, чисел и сообщений;
+    \item \texttt{expect(...).to.deep.equal(...)} для объектов и массивов;
+    \item \texttt{expect(...).to.include(...)} для проверки содержимого строк;
+    \item \texttt{expect(...).to.have.lengthOf(...)} для проверки длины массивов;
+    \item \texttt{expect(...).to.throw(...)} для негативных сценариев.
+\end{itemize}
+
+\section{Assumption-style проверки} \label{ch3:sec4}
+
+Поскольку в экосистеме Jest отсутствует встроенный механизм явных предпосылок теста, в проекте реализован небольшой вспомогательный модуль \texttt{tests/helpers/assume.js}.
+Он используется как аналог assumption-предусловий и позволяет явно фиксировать требования к окружению теста.
+
+В работе использованы два assumption-style метода:
+\begin{itemize}
+    \item \texttt{assumeTrue(...)} --- проверка булева предусловия;
+    \item \texttt{assumeFileExists(...)} --- проверка существования ожидаемого файла.
+\end{itemize}
+
+Оба метода вызываются внутри обёртки \texttt{withAssumptions(...)}, которая завершает тест без ложной интерпретации предусловия как дефекта тестируемой логики.
+Это делает подход функционально эквивалентным assumption-style проверкам и позволяет отделять проблемы окружения от дефектов прикладной логики.
+
+\section{Сводная таблица используемых средств} \label{ch3:sec5}
+
+Основные средства тестового стека приведены в \taref{tab:js-test-api}.
+
+\noindent
+\begingroup
+\centering
+\small
+\begin{longtable}[c]{|p{5.1cm}|p{2.4cm}|p{8cm}|}
+    \caption{Используемые команды и конструкции тестового стека}
+    \label{tab:js-test-api}
+    \\
+    \hline
+    Средство & Библиотека & Назначение \\ \hline
+    \endfirsthead
+    \captionsetup{format=tablenocaption,labelformat=continued}
+    \caption[]{}\\
+    \hline
+    Средство & Библиотека & Назначение \\ \hline
+    \endhead
+    \hline
+    \endfoot
+    \hline
+    \endlastfoot
+    \texttt{describe()} & Jest & группировка test suite \\ \hline
+    \texttt{test()} & Jest & описание отдельного сценария \\ \hline
+    \texttt{test.each()} & Jest & параметризованные тесты \\ \hline
+    \texttt{expect(...).toEqual(...)} & Jest & сравнение массивов и объектов \\ \hline
+    \texttt{expect(...).toBe(...)} & Jest & сравнение примитивных значений \\ \hline
+    \texttt{expect(...).toThrow(...)} & Jest & проверка исключений \\ \hline
+    \texttt{sinon.spy()} & Sinon & отслеживание вызовов \\ \hline
+    \texttt{sinon.stub()} & Sinon & подмена поведения зависимости \\ \hline
+    \texttt{sinon.mock()} & Sinon & контроль ожидаемого вызова \\ \hline
+    \texttt{expect(...).to.equal(...)} & Chai & точная проверка строк и чисел \\ \hline
+    \texttt{expect(...).to.deep.equal(...)} & Chai & глубокое сравнение структур \\ \hline
+    \texttt{expect(...).to.include(...)} & Chai & поиск подстроки \\ \hline
+    \texttt{expect(...).to.have.lengthOf(...)} & Chai & проверка длины \\ \hline
+    \texttt{assumeTrue(...)} & helper & assumption-style предусловие \\ \hline
+    \texttt{assumeFileExists(...)} & helper & assumption-style проверка окружения \\ \hline
+\end{longtable}
+\normalsize
+\endgroup
+
+\section{Выводы} \label{ch3:conclusion}
+
+Выбранный стек полностью покрывает требования практической работы к модульному тестированию на JavaScript.
+Jest обеспечивает каркас тестирования и параметризацию, Sinon закрывает три вида мокирования, Chai делает проверки выразительными, а вспомогательный assumption-style модуль воспроизводит функциональность предусловий.
+За счёт этого в проекте реализованы не только тесты вычислительного ядра, но и полноценные сценарии работы с JSON, консольным интерфейсом и файловым выводом.

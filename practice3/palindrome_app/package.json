@@ -1,0 +1,34 @@
+{
+  "name": "manacher-palindrome-console-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Console application for palindrome substring analysis using Manacher's algorithm.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "jest --runInBand",
+    "test:watch": "jest --watch",
+    "fuzz:dataset": "jazzer fuzz/datasetNameFuzzTarget.js --sync -- -runs=20000",
+    "fuzz:percent": "jazzer fuzz/percentDecoderFuzzTarget.js --sync -- -runs=20000",
+    "lint:security": "eslint src fuzz scripts --format json --output-file reports/static/eslint-security.json",
+    "static:summary": "node scripts/staticSummary.js",
+    "bdd": "cucumber-js features --require features/step_definitions/**/*.js --require features/support/**/*.js --format progress --format html:reports/cucumber/report.html",
+    "datasets": "node scripts/generateDatasets.js",
+    "perf": "node scripts/runPerformanceExperiment.js",
+    "mutation": "stryker run"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "^10.9.0",
+    "@eslint/js": "^9.29.0",
+    "@jazzer.js/core": "^4.0.0",
+    "@stryker-mutator/core": "^8.5.0",
+    "@stryker-mutator/jest-runner": "^8.5.0",
+    "chai": "^4.5.0",
+    "eslint": "^9.29.0",
+    "eslint-plugin-security": "^3.0.1",
+    "eslint-plugin-sonarjs": "^3.0.3",
+    "jest": "^30.0.0",
+    "sinon": "^19.0.0",
+    "ts-api-utils": "^2.5.0"
+  }
+}

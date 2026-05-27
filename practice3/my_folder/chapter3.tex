@@ -1,0 +1,153 @@
+\chapter{Описание статического анализа} \label{ch3}
+
+Данная глава посвящена выбору статических анализаторов, их настройке, результатам
+проверки кода приложения и сопоставлению найденных предупреждений с CWE и БДУ
+ФСТЭК России.
+
+\section{Выбор анализаторов и источники основной информации} \label{ch3:sec1}
+
+Для дальнейшей работы выбраны два анализатора:
+\begin{enumerate}
+    \item SonarJS-совместимые правила ESLint как локальный вариант правил SonarSource;
+    \item ESLint Security как специализированный анализатор потенциальных проблем безопасности JavaScript-кода.
+\end{enumerate}
+
+SonarQube выбран как анализатор из списка ``A''. В официальной документации
+указано, что анализ JavaScript, TypeScript и CSS доступен в SonarQube Server и
+Community Build~\cite{sonarqube-js}. В локальном проекте использованы
+SonarJS-совместимые правила через \texttt{eslint-plugin-sonarjs}: репозиторий
+плагина указывает, что новые версии делают правила SonarJS доступными
+пользователям ESLint~\cite{sonarjs-eslint}. ESLint Security выбран как второй
+анализатор, так как он содержит правила для поиска небезопасных регулярных
+выражений, object injection и опасного использования файловой системы
+~\cite{eslint-security}.
+
+\section{Основные вехи установки и настройки} \label{ch3:sec2}
+
+Установка выполнялась через npm:
+\begin{lstlisting}[breaklines=true]
+npm install eslint @eslint/js eslint-plugin-sonarjs eslint-plugin-security --save-dev
+\end{lstlisting}
+
+Настройка выполнена в файле \texttt{eslint.config.js}. В конфигурацию включены
+правила:
+\begin{itemize}
+    \item \texttt{security/detect-unsafe-regex};
+    \item \texttt{security/detect-object-injection};
+    \item \texttt{security/detect-non-literal-fs-filename};
+    \item \texttt{sonarjs/slow-regex};
+    \item \texttt{sonarjs/no-duplicated-branches};
+    \item \texttt{sonarjs/cognitive-complexity}.
+\end{itemize}
+
+Запуск анализа:
+\begin{lstlisting}[breaklines=true]
+npm run lint:security
+npm run static:summary
+\end{lstlisting}
+
+Первая команда формирует JSON-отчёт \texttt{reports/static/eslint-security.json}.
+Вторая команда преобразует его в CSV-сводку \texttt{reports/static/static-summary.csv}.
+
+\section{Основные виды статического анализа} \label{ch3:sec3}
+
+Выбранные анализаторы выполняют следующие виды проверок:
+\begin{itemize}
+    \item поиск потенциально небезопасных регулярных выражений;
+    \item поиск возможной object injection при обращении к объекту или массиву по динамическому ключу;
+    \item поиск операций файловой системы с нелитеральным именем файла;
+    \item поиск неиспользуемых переменных;
+    \item поиск сложных или дублирующихся ветвей;
+    \item поиск проблем сопровождаемости кода.
+\end{itemize}
+
+Для классификации дефектов использованы Common Weakness Enumeration MITRE~\cite{cwe}
+и Банк данных угроз безопасности информации ФСТЭК России~\cite{bdu-fstec}.
+
+\section{Итоговая таблица результатов статического анализа} \label{ch3:sec4}
+
+Итоговая таблица по предупреждениям, релевантным внесённым ошибкам и анализируемым
+рискам, приведена в \taref{tab:static-results}.
+
+\noindent
+\begingroup
+\centering
+\small
+\begin{longtable}[c]{|p{3.6cm}|p{2.8cm}|p{2.8cm}|p{2.2cm}|p{3.1cm}|}
+    \caption{Комплексная информация по предупреждениям статических анализаторов}
+    \label{tab:static-results}
+    \\
+    \hline
+    Файл & Анализатор / правило & CWE & БДУ ФСТЭК & Описание предупреждения \\ \hline
+    \endfirsthead
+    \hline
+    Файл & Анализатор / правило & CWE & БДУ ФСТЭК & Описание предупреждения \\ \hline
+    \endhead
+    \hline
+    \texttt{datasetNameParser.js:2} & \texttt{security/detect-unsafe-regex} & CWE-1333 & УБИ.038 & Небезопасное регулярное выражение может привести к отказу в обслуживании \\ \hline
+    \texttt{datasetNameParser.js:2} & \texttt{sonarjs/slow-regex} & CWE-1333 & УБИ.038 & Регулярное выражение уязвимо к сверхлинейному времени из-за backtracking \\ \hline
+    \texttt{jsonReader.js:44} & \texttt{security/detect-non-literal-fs-filename} & CWE-22 & УБИ.028 & Использование пути к файлу, полученного не из литерала \\ \hline
+    \texttt{resultWriter.js:20} & \texttt{security/detect-non-literal-fs-filename} & CWE-22 & УБИ.028 & Запись файла по динамическому пути \\ \hline
+    \texttt{manacherOdd.js:22} & \texttt{security/detect-object-injection} & CWE-94 & УБИ.028 & Динамическое обращение по индексу; для массива алгоритма является допустимым, но анализатор помечает как риск \\ \hline
+    \texttt{jsonReader.js:37} & \texttt{no-unused-vars} & CWE-563 & УБИ.025 & Переменная \texttt{error} объявлена, но не используется \\ \hline
+\end{longtable}
+\normalsize
+\endgroup
+
+Ошибка CWE-1333 входит в актуальные перечни опасных слабостей, связанных с
+отказом в обслуживании через неэффективные регулярные выражения. Ошибки CWE-22
+и CWE-94 относятся к распространённым классам дефектов безопасности и требуют
+проверки источника входных данных. В данном приложении часть предупреждений
+\texttt{detect-object-injection} является ложноположительной, так как массивы
+радиусов индексируются числовыми индексами алгоритма, а не пользовательскими
+ключами.
+
+\section{Обсуждение результатов и сравнение анализаторов} \label{ch3:sec5}
+
+ESLint Security оказался более полезным для поиска дефектов безопасности в
+JavaScript-коде. Он обнаружил небезопасное регулярное выражение, динамические пути
+файлов и потенциальную object injection. Его преимущество --- простая установка и
+понятные rule id. Недостаток --- значительное число предупреждений требует ручной
+проверки контекста.
+
+SonarJS-совместимые правила дополнили анализ предупреждением \texttt{slow-regex}.
+Они полезны для проверки качества и сопровождаемости кода, а также для выявления
+части дефектов производительности. В контексте данного приложения SonarJS точнее
+описал риск регулярного выражения как сверхлинейное время из-за backtracking.
+
+Сравнение анализаторов приведено в \taref{tab:analyzer-comparison}.
+
+\noindent
+\begingroup
+\centering
+\small
+\begin{longtable}[c]{|p{4cm}|p{5.5cm}|p{5.5cm}|}
+    \caption{Сравнение удобства и эффективности анализаторов}
+    \label{tab:analyzer-comparison}
+    \\
+    \hline
+    Критерий & ESLint Security & SonarJS-правила \\ \hline
+    \endfirsthead
+    \hline
+    Критерий & ESLint Security & SonarJS-правила \\ \hline
+    \endhead
+    \hline
+    Установка & Через npm, без сервера & Через npm, без сервера \\ \hline
+    Типы предупреждений & Безопасность JavaScript: regex, object injection, fs path & Качество, сопровождаемость, regex-производительность \\ \hline
+    Полезность для проекта & Высокая & Средняя \\ \hline
+    Ложноположительные срабатывания & Есть на индексах массивов & Меньше на выбранных правилах \\ \hline
+    Удобство отчёта & JSON-отчёт и CSV-сводка & Включается в тот же JSON-отчёт ESLint \\ \hline
+\end{longtable}
+\normalsize
+\endgroup
+
+\section{Выводы} \label{ch3:conclusion}
+
+Статический анализ выявил предупреждения, связанные с небезопасным регулярным
+выражением, динамическими путями файлов, потенциальной object injection и
+неиспользуемой переменной. Наиболее значимым предупреждением для внесённых ошибок
+является \texttt{security/detect-unsafe-regex} и \texttt{sonarjs/slow-regex}, так
+как оно указывает на риск отказа в обслуживании при обработке пользовательской
+строки. Результаты статического анализа дополняют фаззинг: фаззер обнаружил
+необработанные исключения на конкретных входах, а статические анализаторы указали
+на потенциальные классы дефектов без выполнения программы.

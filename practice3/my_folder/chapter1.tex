@@ -1,0 +1,132 @@
+\chapter{Описание фаззинг-тестирования} \label{ch1}
+
+Данная глава посвящена динамическому анализу приложения с использованием
+фаззинг-тестирования. Описывается выбранный фаззер, команды запуска, окружение,
+а также тестовые программы для двух модулей с внесёнными ошибками.
+
+\section{Описание фаззера и основных команд} \label{ch1:sec1}
+
+В задании для Java указан Jazzer. Так как приложение реализовано на Node.js, для
+динамического анализа использован Jazzer.js --- coverage-guided in-process fuzzing
+engine для JavaScript-кода~\cite{jazzer-js}. Jazzer.js основан на подходе libFuzzer
+и генерирует входные данные, стремясь увеличить покрытие исполняемых ветвей
+программы.
+
+В проект добавлена зависимость:
+\begin{center}
+\texttt{@jazzer.js/core}
+\end{center}
+
+Основные команды фаззинга приведены в \taref{tab:fuzz-commands}.
+
+\noindent
+\begingroup
+\centering
+\small
+\begin{longtable}[c]{|p{6cm}|p{9cm}|}
+    \caption{Основные команды фаззинг-тестирования}
+    \label{tab:fuzz-commands}
+    \\
+    \hline
+    Команда & Смысл \\ \hline
+    \endfirsthead
+    \hline
+    Команда & Смысл \\ \hline
+    \endhead
+    \hline
+    \texttt{npm install} & Установка зависимостей проекта, включая Jazzer.js \\ \hline
+    \texttt{npm run fuzz:dataset} & Запуск фаззинга модуля разбора имени датасета \\ \hline
+    \texttt{npm run fuzz:percent} & Запуск фаззинга модуля декодирования percent-encoded строки \\ \hline
+    \texttt{jazzer <target> --sync -- -runs=20000} & Запуск синхронного fuzz target с ограничением числа запусков \\ \hline
+\end{longtable}
+\normalsize
+\endgroup
+
+Параметр \texttt{--sync} используется, так как fuzz target вызывает синхронный
+JavaScript-код. Параметр \texttt{-runs=20000} ограничивает число сгенерированных
+входов. При обнаружении необработанного исключения Jazzer.js завершает запуск и
+сохраняет минимальный вход в файл \texttt{crash-*}.
+
+\section{Последовательность действий по запуску фаззера и настройка окружения} \label{ch1:sec2}
+
+Запуск фаззера выполнялся в каталоге приложения:
+\begin{center}
+\texttt{C:\textbackslash mtpo-lab2\textbackslash practice3\textbackslash palindrome\_app}
+\end{center}
+
+Последовательность действий:
+\begin{enumerate}
+    \item установить зависимости командой \texttt{npm install};
+    \item подготовить fuzz target в каталоге \texttt{fuzz};
+    \item добавить npm-скрипты \texttt{fuzz:dataset} и \texttt{fuzz:percent};
+    \item выполнить \texttt{npm run fuzz:dataset};
+    \item выполнить \texttt{npm run fuzz:percent};
+    \item сохранить вывод фаззера в каталог \texttt{reports/fuzz}.
+\end{enumerate}
+
+Программная конфигурация приведена в \taref{tab:fuzz-env}.
+
+\noindent
+\begingroup
+\centering
+\small
+\begin{longtable}[c]{|p{5cm}|p{10cm}|}
+    \caption{Окружение фаззинг-тестирования}
+    \label{tab:fuzz-env}
+    \\
+    \hline
+    Компонент & Значение \\ \hline
+    \endfirsthead
+    \hline
+    Компонент & Значение \\ \hline
+    \endhead
+    \hline
+    Операционная система & Windows \\ \hline
+    Среда выполнения & Node.js v24.13.0 \\ \hline
+    npm & 11.6.2 \\ \hline
+    Фаззер & Jazzer.js, пакет \texttt{@jazzer.js/core} \\ \hline
+    Каталог отчётов & \texttt{reports/fuzz} \\ \hline
+\end{longtable}
+\normalsize
+\endgroup
+
+\section{Описание тестовых программ} \label{ch1:sec3}
+
+Для фаззинга выбраны два модуля, в которые внесены две ошибки.
+
+\textbf{Модуль \texttt{datasetNameParser.js}.}
+Модуль разбирает имя датасета по формату \texttt{TYPE\_SIZE\_SERIES}. Ошибка
+заключается в отсутствии проверки числа частей после \texttt{split("\_")}. Если
+входная строка не содержит третьей части, выражение \texttt{parts[2].toLowerCase()}
+вызывает \texttt{TypeError}.
+
+Fuzz target:
+\begin{lstlisting}[language=JavaScript,breaklines=true]
+const { parseDatasetName } = require("../src/vulnerable/datasetNameParser");
+
+module.exports.fuzz = function fuzz(data) {
+  parseDatasetName(data.toString("utf8"));
+};
+\end{lstlisting}
+
+\textbf{Модуль \texttt{percentInputDecoder.js}.}
+Модуль декодирует percent-encoded строку через \texttt{decodeURIComponent}. Ошибка
+заключается в отсутствии обработки исключения \texttt{URIError}, возникающего на
+некорректной последовательности percent-кодирования, например на строке
+\texttt{\%}.
+
+Fuzz target:
+\begin{lstlisting}[language=JavaScript,breaklines=true]
+const { decodePercentInput } = require("../src/vulnerable/percentInputDecoder");
+
+module.exports.fuzz = function fuzz(data) {
+  decodePercentInput(data.toString("utf8"));
+};
+\end{lstlisting}
+
+\section{Выводы} \label{ch1:conclusion}
+
+Для динамического анализа подготовлены два fuzz target, соответствующие двум
+модулям с внесёнными ошибками. Фаззер Jazzer.js выбран как аналог Jazzer для
+JavaScript/Node.js и позволяет находить необработанные исключения на автоматически
+сгенерированных входных данных.

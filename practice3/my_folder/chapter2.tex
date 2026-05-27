@@ -1,0 +1,113 @@
+\chapter{Описание экспериментов по фаззингу} \label{ch2}
+
+Данная глава содержит результаты запусков фаззера, входные данные, позволившие
+выявить ошибки, а также оценку времени, памяти, удобства и эффективности
+динамического анализа.
+
+\section{Условия проведения эксперимента} \label{ch2:sec1}
+
+Эксперименты выполнялись в локальном каталоге приложения. Для каждого fuzz target
+использовалась команда с ограничением \texttt{-runs=20000}. Фактически оба дефекта
+были найдены до достижения установленного лимита запусков.
+
+Условия эксперимента приведены в \taref{tab:fuzz-exp-env}.
+
+\noindent
+\begingroup
+\centering
+\small
+\begin{longtable}[c]{|p{5cm}|p{10cm}|}
+    \caption{Условия проведения эксперимента по фаззингу}
+    \label{tab:fuzz-exp-env}
+    \\
+    \hline
+    Параметр & Значение \\ \hline
+    \endfirsthead
+    \hline
+    Параметр & Значение \\ \hline
+    \endhead
+    \hline
+    Рабочий каталог & \texttt{practice3/palindrome\_app} \\ \hline
+    Фаззер & Jazzer.js \\ \hline
+    Целевые модули & \texttt{datasetNameParser.js}, \texttt{percentInputDecoder.js} \\ \hline
+    Ограничение запусков & \texttt{-runs=20000} \\ \hline
+    Сохранение результатов & \texttt{reports/fuzz/dataset-fuzz.txt}, \texttt{reports/fuzz/percent-fuzz.txt} \\ \hline
+\end{longtable}
+\normalsize
+\endgroup
+
+\section{Затраты по времени и памяти} \label{ch2:sec2}
+
+Jazzer.js выводит количество выполненных запусков и показатель \texttt{rss}, то есть
+объём используемой памяти процесса. Результаты приведены в \taref{tab:fuzz-costs}.
+
+\noindent
+\begingroup
+\centering
+\small
+\begin{longtable}[c]{|p{4.2cm}|p{3cm}|p{3cm}|p{4.5cm}|}
+    \caption{Затраты по времени и памяти при фаззинге}
+    \label{tab:fuzz-costs}
+    \\
+    \hline
+    Fuzz target & Запусков до ошибки & Память & Итог \\ \hline
+    \endfirsthead
+    \hline
+    Fuzz target & Запусков до ошибки & Память & Итог \\ \hline
+    \endhead
+    \hline
+    \texttt{datasetNameFuzzTarget.js} & 1 & Не выводилась отдельно до аварии & Найден \texttt{TypeError} \\ \hline
+    \texttt{percentDecoderFuzzTarget.js} & 134 & 170 МБ & Найден \texttt{URIError} \\ \hline
+\end{longtable}
+\normalsize
+\endgroup
+
+В обоих случаях ошибка была найдена практически сразу. Для \texttt{datasetNameFuzzTarget}
+минимальным входом стала пустая строка. Для \texttt{percentDecoderFuzzTarget}
+минимальным входом стала строка \texttt{\%}, сохранённая фаззером в crash-файл с
+Base64-представлением \texttt{JQ==}.
+
+\section{Итоговая таблица результатов фаззинга} \label{ch2:sec3}
+
+Итоговая информация по найденным дефектам приведена в \taref{tab:fuzz-results}.
+
+\noindent
+\begingroup
+\centering
+\small
+\begin{longtable}[c]{|p{3.8cm}|p{3cm}|p{3.5cm}|p{4.7cm}|}
+    \caption{Итоговые результаты фаззинг-тестирования}
+    \label{tab:fuzz-results}
+    \\
+    \hline
+    Модуль & Подобранные данные & Исключение & Суть ошибки \\ \hline
+    \endfirsthead
+    \hline
+    Модуль & Подобранные данные & Исключение & Суть ошибки \\ \hline
+    \endhead
+    \hline
+    \texttt{datasetNameParser.js} & Пустая строка & \texttt{TypeError} & Нет проверки количества частей имени датасета \\ \hline
+    \texttt{percentInputDecoder.js} & \texttt{\%} & \texttt{URIError} & Нет обработки некорректного percent-кодирования \\ \hline
+\end{longtable}
+\normalsize
+\endgroup
+
+\section{Обсуждение результатов} \label{ch2:sec4}
+
+Jazzer.js показал высокую скорость поиска ошибок в выбранных модулях. Оба дефекта
+были найдены без ручного подбора входных данных. Детализация сообщения достаточна
+для локализации ошибки: вывод содержит тип исключения, стек вызовов, строку файла
+и минимальный вход, сохранённый в crash-файл.
+
+Для модуля \texttt{datasetNameParser.js} фаззер показал, что функция не проверяет
+структуру входной строки перед обращением к элементу массива. Для модуля
+\texttt{percentInputDecoder.js} фаззер показал, что стандартная функция
+\texttt{decodeURIComponent} может аварийно завершить обработку некорректного
+пользовательского ввода.
+
+\section{Выводы} \label{ch2:conclusion}
+
+Фаззинг оказался удобным и эффективным для поиска ошибок в функциях, работающих
+с пользовательским вводом. Для данного приложения он особенно полезен на границах
+форматов: имена датасетов, JSON-строки, percent-кодирование и строковые параметры
+алгоритма.

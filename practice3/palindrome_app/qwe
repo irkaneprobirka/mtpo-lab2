@@ -1,0 +1,32 @@
+{
+  "algorithm": "center-expansion",
+  "input": "56756766",
+  "oddRadii": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    2,
+    1,
+    1
+  ],
+  "evenRadii": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1
+  ],
+  "longestPalindrome": {
+    "start": 4,
+    "end": 6,
+    "length": 3,
+    "value": "676"
+  },
+  "palindromeCount": 10,
+  "recommendation": "Строка содержит несколько локальных палиндромных областей."
+}
